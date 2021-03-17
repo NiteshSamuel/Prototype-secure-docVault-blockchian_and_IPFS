@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import getWeb3 from "./getWeb3";
+import ipfs from './ipfs';
 
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null, buffer: null };
+  state = { storageValue: 0, web3: null, accounts: null, contract: null, buffer: null, ipfsHash:null };
 
   captureFile = (event)=>{
     event.preventDefault()
@@ -15,14 +16,23 @@ class App extends Component {
     reader.readAsArrayBuffer(file)
     reader.onloadend=()=>{
       this.setState({buffer: Buffer(reader.result)})
-      
+      //console.log(this.state.buffer)
 
     }
     
   }
   onSubmit =(event)=>{
     event.preventDefault();
-    console.log("submitting");
+    console.log(this.state.buffer)
+    ipfs.files.add(this.state.buffer,(error,result)=>{
+      if(error){
+        console.log(error)
+        return;
+      }
+      
+      this.setState({ipfsHash: result[0].hash})
+      console.log('ipfsHash',this.state.ipfsHash)
+    })
   }
   
   
@@ -54,18 +64,18 @@ class App extends Component {
     }
   };
 
-  runExample = async () => {
-    const { accounts, contract } = this.state;
+  // runExample = async () => {
+  //   const { accounts, contract } = this.state;
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+  //   // Stores a given value, 5 by default.
+  //   await contract.methods.set(5).send({ from: accounts[0] });
 
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
+  //   // Get the value from the contract to prove it worked.
+  //   const response = await contract.methods.get().call();
 
-    // Update state with the result.
-    this.setState({ storageValue: response });
-  };
+  //   // Update state with the result.
+  //   this.setState({ storageValue: response });
+  // };
 
   
 
@@ -81,7 +91,7 @@ class App extends Component {
         <p>
           please uplode the file
         </p>
-       <img src="" alt=""/>
+       <img src={`https://ipfs.io/ipfs/${this.state.ipfsHash}`} alt=""/>
        <h2>uplode File</h2>
        <form onSubmit={this.onSubmit}>
          <input type="file" onChange={this.captureFile}/>
