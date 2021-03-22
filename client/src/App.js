@@ -31,10 +31,20 @@ class App extends Component {
       }
       
       this.setState({ipfsHash: result[0].hash})
+  console.log(this.state.accounts);
+     this.SimpleStorageContract.set(result[0].hash,{from: this.state.accounts}).then((res)=>{
+       return SimpleStorageContract.get.call(this.state.accounts)
+     }).then((ipfsHash)=>{
+       //update
+       this.state({ipfsHash})
+       console.log('ipfsHash',this.state.ipfsHash)
+
+     })
+
+     
       console.log('ipfsHash',this.state.ipfsHash)
     })
   }
-  
   
   componentDidMount = async () => {
     try {
@@ -64,6 +74,7 @@ class App extends Component {
     }
   };
 
+  
   // runExample = async () => {
   //   const { accounts, contract } = this.state;
 
